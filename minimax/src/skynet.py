@@ -5,6 +5,7 @@ class Skynet:
     def __init__(self):
         self.adjacency = {}
         self.gateways = set()
+        self.distances = {}
 
     def __str__(self):
         s = f"Adjacency list: {self.adjacency}" + '\n'
@@ -61,16 +62,18 @@ class Skynet:
             return 1
 
     def preference(self, node, visited_set):
-        # returns sorted list of actions giving preference to not visited ones
-        # and still more preference to gateways
-        pref_list = []
+        # returns sorted list of actions giving preference to nodes not visited
+        # and, among these, to the ones closer to gateways
+        pref_dict = {}
+        others_dict = {}
         for action in self.adjacency[node]:
-            if action in self.gateways:
-                return [action]
             if action not in visited_set:
-                pref_list.append(action)
-        for action in visited_set:
-            pref_list.append(action)
+                pref_dict[action] = self.distances[action]
+            else:
+                others_dict[action] = self.distances[action]
+        first_tuples = sorted(pref_dict.items(), key=lambda item: item[1])
+        last_tuples = sorted(others_dict.items(), key=lambda item: item[1])
+        pref_list = [i[0] for i in first_tuples] + [i[0] for i in last_tuples]
         return pref_list
 
     def gateway_ordering(self, node):
@@ -112,3 +115,23 @@ class Skynet:
             return True
         else:
             return False
+
+    def computeDistancesFromGateways(self):
+        for gateway in self.gateways:
+            scheduled = set()
+            branch_list = [{gateway: "jolly"}]
+            depth = {"jolly": -1}
+            while len(branch_list) > 0:
+                current_pair = branch_list.pop(0)
+                current = list(current_pair.keys())[0]
+                previous = current_pair[current]
+                depth[current] = depth[previous] + 1    # 'previous' is the parent of 'current' node
+                if self.distances.get(current) is None:
+                    self.distances[current] = depth[current]
+                else:
+                    self.distances[current] = min(self.distances[current], depth[current])
+                for neighbor in self.adjacency[current]:
+                    if neighbor not in scheduled and neighbor not in self.gateways:
+                        scheduled.add(neighbor)
+                        branch_list.append({neighbor: current})    # current is the parent of the neighbor
+
