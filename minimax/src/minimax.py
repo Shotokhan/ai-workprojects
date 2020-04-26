@@ -1,7 +1,3 @@
-# TODO: improve performance (make execution faster) for complex_mesh,
-# so when the branching factor is high
-
-
 def minimax_decision(node, skynet):
     v = -2
     visited = set()
