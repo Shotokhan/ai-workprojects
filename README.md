@@ -3,3 +3,4 @@ Work projects related to an AI course. There are three projects assigned by the 
 
 The first one is about decision tree learning.
 The second is about optimization of functions.
+The third is only done "by hand", about Bayes networks and neural networks.
